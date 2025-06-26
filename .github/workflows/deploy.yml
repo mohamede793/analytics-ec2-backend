@@ -1,0 +1,52 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup SSH Key
+      run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key.pem
+        chmod 400 ssh_key.pem
+        
+    - name: Deploy to Instance 1
+      run: |
+        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_1_IP }} << 'DEPLOY_COMMANDS'
+          cd /home/ec2-user/api
+          git pull origin main || git clone https://github.com/mohamede793/analytics-ec2-backend.git . 
+          export PATH=$PATH:/usr/local/go/bin
+          /usr/local/go/bin/go mod tidy
+          /usr/local/go/bin/go build -o api-server main.go
+          pkill -f api-server || true
+          sleep 2
+          nohup ./api-server > app.log 2>&1 &
+          echo "✅ Deployed to instance 1"
+        DEPLOY_COMMANDS
+        
+    - name: Deploy to Instance 2
+      run: |
+        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_2_IP }} << 'DEPLOY_COMMANDS'
+          cd /home/ec2-user/api
+          git pull origin main || git clone https://github.com/mohamede793/analytics-ec2-backend.git .
+          export PATH=$PATH:/usr/local/go/bin
+          /usr/local/go/bin/go mod tidy
+          /usr/local/go/bin/go build -o api-server main.go
+          pkill -f api-server || true
+          sleep 2
+          nohup ./api-server > app.log 2>&1 &
+          echo "✅ Deployed to instance 2"
+        DEPLOY_COMMANDS
+
+    - name: Test API
+      run: |
+        sleep 10
+        curl -f "http://my-api-alb-527946428.us-east-1.elb.amazonaws.com/health"
