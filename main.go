@@ -98,4 +98,4 @@ func main() {
 	fmt.Println("  GET /api/name?name=YourName - Name greeting endpoint")
 	
 	log.Fatal(http.ListenAndServe(":3000", r))
-}
+}// Deployment test
