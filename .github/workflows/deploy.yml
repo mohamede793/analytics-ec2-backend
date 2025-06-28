@@ -24,7 +24,7 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key.pem
         chmod 400 ssh_key.pem
         
-    - name: Deploy to Instance 1
+            - name: Deploy to Instance 1
       run: |
         BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
         API_KEY="${{ secrets.API_KEY }}"
@@ -35,7 +35,11 @@ jobs:
           git pull origin $BRANCH || git clone -b $BRANCH https://github.com/mohamede793/analytics-ec2-backend.git . 
           export PATH=\$PATH:/usr/local/go/bin
           /usr/local/go/bin/go mod tidy
-          /usr/local/go/bin/go build -o api-server cmd/main.go
+          echo "Building Go application..."
+          if ! /usr/local/go/bin/go build -o api-server cmd/main.go; then
+            echo "❌ Build failed!"
+            exit 1
+          fi
           pkill -f api-server || true
           sleep 2
           export API_KEY="$API_KEY"
@@ -43,7 +47,7 @@ jobs:
           echo "✅ Deployed to instance 1 on branch $BRANCH with API_KEY set"
         EOF
         
-    - name: Deploy to Instance 2
+            - name: Deploy to Instance 2
       run: |
         BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
         API_KEY="${{ secrets.API_KEY }}"
@@ -54,7 +58,11 @@ jobs:
           git pull origin $BRANCH || git clone -b $BRANCH https://github.com/mohamede793/analytics-ec2-backend.git .
           export PATH=\$PATH:/usr/local/go/bin
           /usr/local/go/bin/go mod tidy
-          /usr/local/go/bin/go build -o api-server cmd/main.go
+          echo "Building Go application..."
+          if ! /usr/local/go/bin/go build -o api-server cmd/main.go; then
+            echo "❌ Build failed!"
+            exit 1
+          fi
           pkill -f api-server || true
           sleep 2
           export API_KEY="$API_KEY"
