@@ -46,7 +46,7 @@ func (a *APIKeyAuth) RequireAuth(w http.ResponseWriter, r *http.Request) bool {
 				"message": "Valid Bearer token required",
 				"details": "Authorization header must contain 'Bearer <token>'"
 			},
-			"server": "microcontroller-api",
+			"server": "github.com/mohamede793/analytics-ec2-backend",
 			"timestamp": "` + getCurrentTimestamp() + `"
 		}`))
 		return false

@@ -9,11 +9,11 @@ import (
 
 	"github.com/gorilla/mux"
 	
-	"microcontroller-api/internal/auth"
-	"microcontroller-api/internal/models"
-	"microcontroller-api/internal/storage"
-	"microcontroller-api/pkg/logger"
-	"microcontroller-api/pkg/response"
+    "github.com/mohamede793/analytics-ec2-backend/internal/auth"
+    "github.com/mohamede793/analytics-ec2-backend/internal/models"
+    "github.com/mohamede793/analytics-ec2-backend/internal/storage"
+    "github.com/mohamede793/analytics-ec2-backend/pkg/logger"
+    "github.com/mohamede793/analytics-ec2-backend/pkg/response"
 )
 
 type SensorHandler struct {

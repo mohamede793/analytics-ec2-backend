@@ -1,4 +1,4 @@
-module my-api
+module github.com/mohamede793/analytics-ec2-backend
 
 go 1.21
 

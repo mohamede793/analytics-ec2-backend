@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"microcontroller-api/internal/models"
+	"github.com/mohamede793/analytics-ec2-backend/internal/models"
 )
 
 // MemoryStorage provides in-memory storage for sensor data

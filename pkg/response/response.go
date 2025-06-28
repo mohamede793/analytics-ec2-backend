@@ -106,5 +106,5 @@ func getServerName() string {
 	if hostname, err := os.Hostname(); err == nil {
 		return hostname
 	}
-	return "microcontroller-api"
+	return "github.com/mohamede793/analytics-ec2-backend"
 }

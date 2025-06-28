@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"time"
 
-	"microcontroller-api/pkg/logger"
-	"microcontroller-api/pkg/response"
+	"github.com/mohamede793/analytics-ec2-backend/pkg/logger"
+	"github.com/mohamede793/analytics-ec2-backend/pkg/response"
 )
 
 var startTime = time.Now()
