@@ -4,6 +4,12 @@ on:
   push:
     branches: [ main, v1_code ]
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+        type: string
 
 jobs:
   deploy:
@@ -20,10 +26,11 @@ jobs:
         
     - name: Deploy to Instance 1
       run: |
-        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_1_IP }} << 'DEPLOY_COMMANDS'
+        BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
+        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_1_IP }} << DEPLOY_COMMANDS
           cd /home/ec2-user/api
-          git pull origin main || git clone https://github.com/mohamede793/analytics-ec2-backend.git . 
-          export PATH=$PATH:/usr/local/go/bin
+          git pull origin \$BRANCH || git clone -b \$BRANCH https://github.com/mohamede793/analytics-ec2-backend.git . 
+          export PATH=\$PATH:/usr/local/go/bin
           /usr/local/go/bin/go mod tidy
           /usr/local/go/bin/go build -o api-server main.go
           pkill -f api-server || true
@@ -34,10 +41,11 @@ jobs:
         
     - name: Deploy to Instance 2
       run: |
-        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_2_IP }} << 'DEPLOY_COMMANDS'
+        BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
+        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_2_IP }} << DEPLOY_COMMANDS
           cd /home/ec2-user/api
-          git pull origin main || git clone https://github.com/mohamede793/analytics-ec2-backend.git .
-          export PATH=$PATH:/usr/local/go/bin
+          git pull origin \$BRANCH || git clone -b \$BRANCH https://github.com/mohamede793/analytics-ec2-backend.git .
+          export PATH=\$PATH:/usr/local/go/bin
           /usr/local/go/bin/go mod tidy
           /usr/local/go/bin/go build -o api-server main.go
           pkill -f api-server || true
