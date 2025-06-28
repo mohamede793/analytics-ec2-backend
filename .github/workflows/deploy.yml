@@ -24,7 +24,7 @@ jobs:
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key.pem
         chmod 400 ssh_key.pem
         
-            - name: Deploy to Instance 1
+    - name: Deploy to Instance 1
       run: |
         BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
         API_KEY="${{ secrets.API_KEY }}"
@@ -47,7 +47,7 @@ jobs:
           echo "✅ Deployed to instance 1 on branch $BRANCH with API_KEY set"
         EOF
         
-            - name: Deploy to Instance 2
+    - name: Deploy to Instance 2
       run: |
         BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
         API_KEY="${{ secrets.API_KEY }}"
