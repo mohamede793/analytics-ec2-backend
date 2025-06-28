@@ -98,7 +98,7 @@ func nameHandler(w http.ResponseWriter, r *http.Request) {
 	// Create response data
 	data := NameData{
 		Name:     name,
-		Greeting: fmt.Sprintf("Hello, %s! Welcome to our API.", name),
+		Greeting: fmt.Sprintf("Hello, %s! Welcome to our NEW API.", name),
 	}
 
 	// Send success response
