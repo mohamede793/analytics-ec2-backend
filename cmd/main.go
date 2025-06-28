@@ -3,8 +3,7 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
+
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,11 +11,11 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	
-    "github.com/mohamede793/analytics-ec2-backend/internal/auth"
-    "github.com/mohamede793/analytics-ec2-backend/internal/handlers"
-    "github.com/mohamede793/analytics-ec2-backend/internal/storage"
-    "github.com/mohamede793/analytics-ec2-backend/pkg/logger"
+
+	"github.com/mohamede793/analytics-ec2-backend/internal/auth"
+	"github.com/mohamede793/analytics-ec2-backend/internal/handlers"
+	"github.com/mohamede793/analytics-ec2-backend/internal/storage"
+	"github.com/mohamede793/analytics-ec2-backend/pkg/logger"
 )
 
 func main() {
