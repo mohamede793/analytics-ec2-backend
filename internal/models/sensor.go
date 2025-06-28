@@ -3,6 +3,7 @@ package models
 
 import (
 	"time"
+	"fmt"
 )
 
 // SensorReading represents a single sensor data point
