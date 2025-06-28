@@ -30,16 +30,25 @@ jobs:
         API_KEY="${{ secrets.API_KEY }}"
         ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_1_IP }} << EOF
           cd /home/ec2-user/api
+          
+          # Reset any local changes that might be blocking the pull
+          git reset --hard HEAD
+          git clean -fd
+          
+          # Fetch and checkout the branch
           git fetch origin
           git checkout $BRANCH || git checkout -b $BRANCH origin/$BRANCH
           git pull origin $BRANCH || git clone -b $BRANCH https://github.com/mohamede793/analytics-ec2-backend.git . 
+          
           export PATH=\$PATH:/usr/local/go/bin
           /usr/local/go/bin/go mod tidy
+          
           echo "Building Go application..."
           if ! /usr/local/go/bin/go build -o api-server cmd/main.go; then
             echo "❌ Build failed!"
             exit 1
           fi
+          
           pkill -f api-server || true
           sleep 2
           export API_KEY="$API_KEY"
@@ -53,16 +62,25 @@ jobs:
         API_KEY="${{ secrets.API_KEY }}"
         ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_2_IP }} << EOF
           cd /home/ec2-user/api
+          
+          # Reset any local changes that might be blocking the pull
+          git reset --hard HEAD
+          git clean -fd
+          
+          # Fetch and checkout the branch
           git fetch origin
           git checkout $BRANCH || git checkout -b $BRANCH origin/$BRANCH
           git pull origin $BRANCH || git clone -b $BRANCH https://github.com/mohamede793/analytics-ec2-backend.git .
+          
           export PATH=\$PATH:/usr/local/go/bin
           /usr/local/go/bin/go mod tidy
+          
           echo "Building Go application..."
           if ! /usr/local/go/bin/go build -o api-server cmd/main.go; then
             echo "❌ Build failed!"
             exit 1
           fi
+          
           pkill -f api-server || true
           sleep 2
           export API_KEY="$API_KEY"
