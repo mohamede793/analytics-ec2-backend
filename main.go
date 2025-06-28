@@ -52,7 +52,7 @@ func sendResponse(w http.ResponseWriter, statusCode int, success bool, message s
 
 // Health check endpoint for ALB
 func healthHandler(w http.ResponseWriter, r *http.Request) {
-	sendResponse(w, http.StatusOK, true, "This is the V1 TESTING server", nil, "")
+	sendResponse(w, http.StatusOK, true, "Testing the new deploy script", nil, "")
 }
 
 // Name endpoint - accepts name parameter and returns greeting
