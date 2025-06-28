@@ -57,6 +57,35 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 
 // Name endpoint - accepts name parameter and returns greeting
 func nameHandler(w http.ResponseWriter, r *http.Request) {
+	// Get API key from Authorization header only
+	authHeader := r.Header.Get("Authorization")
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		sendResponse(w, http.StatusUnauthorized, false, "Unauthorized", nil, "Authorization header with Bearer token is required")
+		return
+	}
+	
+	// Extract the token
+	apiKey := strings.TrimPrefix(authHeader, "Bearer ")
+	
+	// Validate API key is provided
+	if apiKey == "" {
+		sendResponse(w, http.StatusUnauthorized, false, "Unauthorized", nil, "API key is required")
+		return
+	}
+	
+	// Get expected API key from environment variable
+	expectedAPIKey := os.Getenv("API_KEY")
+	if expectedAPIKey == "" {
+		sendResponse(w, http.StatusInternalServerError, false, "Internal Server Error", nil, "Server configuration error")
+		return
+	}
+	
+	// Validate API key matches
+	if apiKey != expectedAPIKey {
+		sendResponse(w, http.StatusUnauthorized, false, "Unauthorized", nil, "Invalid API key")
+		return
+	}
+
 	// Get name from query parameter
 	name := r.URL.Query().Get("name")
 	
