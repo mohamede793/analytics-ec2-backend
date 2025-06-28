@@ -27,36 +27,36 @@ jobs:
     - name: Deploy to Instance 1
       run: |
         BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
-        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_1_IP }} << DEPLOY_COMMANDS
+        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_1_IP }} << EOF
           cd /home/ec2-user/api
           git fetch origin
-          git checkout \$BRANCH || git checkout -b \$BRANCH origin/\$BRANCH
-          git pull origin \$BRANCH || git clone -b \$BRANCH https://github.com/mohamede793/analytics-ec2-backend.git . 
+          git checkout $BRANCH || git checkout -b $BRANCH origin/$BRANCH
+          git pull origin $BRANCH || git clone -b $BRANCH https://github.com/mohamede793/analytics-ec2-backend.git . 
           export PATH=\$PATH:/usr/local/go/bin
           /usr/local/go/bin/go mod tidy
           /usr/local/go/bin/go build -o api-server main.go
           pkill -f api-server || true
           sleep 2
           nohup ./api-server > app.log 2>&1 &
-          echo "✅ Deployed to instance 1 on branch \$BRANCH"
-        DEPLOY_COMMANDS
+          echo "✅ Deployed to instance 1 on branch $BRANCH"
+        EOF
         
     - name: Deploy to Instance 2
       run: |
         BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
-        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_2_IP }} << DEPLOY_COMMANDS
+        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_2_IP }} << EOF
           cd /home/ec2-user/api
           git fetch origin
-          git checkout \$BRANCH || git checkout -b \$BRANCH origin/\$BRANCH
-          git pull origin \$BRANCH || git clone -b \$BRANCH https://github.com/mohamede793/analytics-ec2-backend.git .
+          git checkout $BRANCH || git checkout -b $BRANCH origin/$BRANCH
+          git pull origin $BRANCH || git clone -b $BRANCH https://github.com/mohamede793/analytics-ec2-backend.git .
           export PATH=\$PATH:/usr/local/go/bin
           /usr/local/go/bin/go mod tidy
           /usr/local/go/bin/go build -o api-server main.go
           pkill -f api-server || true
           sleep 2
           nohup ./api-server > app.log 2>&1 &
-          echo "✅ Deployed to instance 2 on branch \$BRANCH"
-        DEPLOY_COMMANDS
+          echo "✅ Deployed to instance 2 on branch $BRANCH"
+        EOF
 
     - name: Test API
       run: |
