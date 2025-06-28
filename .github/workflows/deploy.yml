@@ -2,8 +2,14 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, v1_code ]
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+        type: string
 
 jobs:
   deploy:
@@ -20,31 +26,67 @@ jobs:
         
     - name: Deploy to Instance 1
       run: |
-        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_1_IP }} << 'DEPLOY_COMMANDS'
+        BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
+        API_KEY="${{ secrets.API_KEY }}"
+        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_1_IP }} << EOF
           cd /home/ec2-user/api
-          git pull origin main || git clone https://github.com/mohamede793/analytics-ec2-backend.git . 
-          export PATH=$PATH:/usr/local/go/bin
+          
+          # Reset any local changes that might be blocking the pull
+          git reset --hard HEAD
+          git clean -fd
+          
+          # Fetch and checkout the branch
+          git fetch origin
+          git checkout $BRANCH || git checkout -b $BRANCH origin/$BRANCH
+          git pull origin $BRANCH || git clone -b $BRANCH https://github.com/mohamede793/analytics-ec2-backend.git . 
+          
+          export PATH=\$PATH:/usr/local/go/bin
           /usr/local/go/bin/go mod tidy
-          /usr/local/go/bin/go build -o api-server main.go
+          
+          echo "Building Go application..."
+          if ! /usr/local/go/bin/go build -o api-server cmd/main.go; then
+            echo "❌ Build failed!"
+            exit 1
+          fi
+          
           pkill -f api-server || true
           sleep 2
-          nohup ./api-server > app.log 2>&1 &
-          echo "✅ Deployed to instance 1"
-        DEPLOY_COMMANDS
+          export API_KEY="$API_KEY"
+          nohup env API_KEY="$API_KEY" ./api-server > app.log 2>&1 &
+          echo "✅ Deployed to instance 1 on branch $BRANCH with API_KEY set"
+        EOF
         
     - name: Deploy to Instance 2
       run: |
-        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_2_IP }} << 'DEPLOY_COMMANDS'
+        BRANCH="${{ github.event.inputs.branch || github.ref_name }}"
+        API_KEY="${{ secrets.API_KEY }}"
+        ssh -i ssh_key.pem -o StrictHostKeyChecking=no ec2-user@${{ secrets.INSTANCE_2_IP }} << EOF
           cd /home/ec2-user/api
-          git pull origin main || git clone https://github.com/mohamede793/analytics-ec2-backend.git .
-          export PATH=$PATH:/usr/local/go/bin
+          
+          # Reset any local changes that might be blocking the pull
+          git reset --hard HEAD
+          git clean -fd
+          
+          # Fetch and checkout the branch
+          git fetch origin
+          git checkout $BRANCH || git checkout -b $BRANCH origin/$BRANCH
+          git pull origin $BRANCH || git clone -b $BRANCH https://github.com/mohamede793/analytics-ec2-backend.git .
+          
+          export PATH=\$PATH:/usr/local/go/bin
           /usr/local/go/bin/go mod tidy
-          /usr/local/go/bin/go build -o api-server main.go
+          
+          echo "Building Go application..."
+          if ! /usr/local/go/bin/go build -o api-server cmd/main.go; then
+            echo "❌ Build failed!"
+            exit 1
+          fi
+          
           pkill -f api-server || true
           sleep 2
-          nohup ./api-server > app.log 2>&1 &
-          echo "✅ Deployed to instance 2"
-        DEPLOY_COMMANDS
+          export API_KEY="$API_KEY"
+          nohup env API_KEY="$API_KEY" ./api-server > app.log 2>&1 &
+          echo "✅ Deployed to instance 2 on branch $BRANCH with API_KEY set"
+        EOF
 
     - name: Test API
       run: |
